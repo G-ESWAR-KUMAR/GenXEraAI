@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GenXEraAI</title>
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-tertiary);
+        }
+
+        html[data-theme="light"] .stat-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            color: var(--text-secondary);
+        }
+
+        .stat-val {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-lbl {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        html[data-theme="light"] .stat-lbl {
+            color: var(--text-secondary);
+        }
+
+        body {
+            color: var(--text-primary);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+        }
+
+        .card-glass, .dashboard-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        html[data-theme="light"] .card-glass,
+        html[data-theme="light"] .dashboard-card {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .user-panel {
+            color: var(--text-secondary);
+        }
+
+        .user-info h3 {
+            color: var(--text-primary);
+        }
+
+        html[data-theme="light"] .user-info h3 {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Canvas Background -->
+    <canvas id="constellation"></canvas>
+
+    <!-- Theme Orb -->
+    <div id="themeOrb" onclick="changeTheme()" title="Change Atmosphere"></div>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+       
+
+        <div class="dashboard-header">
+            <div class="header-title">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="GenXEraAI" style="height: 32px; width: auto;">
+                </div>
+                <h1>Welcome to GenXEraAI</h1>
+                <p>Your learning dashboard for skill advancement</p>
+            </div>
+
+            <div class="user-panel">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info-text">
+                    <div class="user-display-name">{{ user.username }}</div>
+                    <div class="user-meta-info">Student • {{ user.email }}</div>
+                </div>
+
+                <div style="position: relative; margin-left: 8px;">
+                    <button id="settingsBtn" class="settings-button">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div id="settingsDropdown" class="settings-dropdown">
+                        <div class="settings-item" onclick="location.href='{{ url_for('logout') }}'">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns: 1fr; max-width: 400px; margin: 0 auto;">
+            <!-- Active Courses -->
+            <div class="card-glass" onclick="location.href='{{ url_for('index') }}#internships'">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <div class="card-title">Explore Courses</div>
+                        <div class="card-value">16</div>
+                    </div>
+                    <div class="card-icon accent-primary">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                    <i class="fas fa-check-circle" style="color: var(--primary); margin-right: 6px;"></i>
+                    Programs Available
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Stats Section -->
+        <div class="stats-section" style="margin-top: 40px;">
+            <h2 class="stats-title">Weekly Performance</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-val">{{ solved_count | default('0') }}</div>
+                    <div class="stat-lbl">Solved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val">{{ solved_count | default('0') }}</div>
+                    <div class="stat-lbl">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val">100%</div>
+                    <div class="stat-lbl">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val">5</div>
+                    <div class="stat-lbl">Streak</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val">{{ points_earned | default('0') }}</div>
+                    <div class="stat-lbl">Points</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Section -->
+        <div style="display: flex; justify-content: center; gap: 16px; margin-top: 40px; flex-wrap: wrap;">
+            <button class="action-button" onclick="location.href='{{ url_for('index') }}'">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="action-button" onclick="location.href='{{ url_for('logout') }}'"
+                style="border-color: #ff4444; color: #ff4444;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div
+            style="padding: 15px; border-radius: 8px; margin-bottom: 20px; background: {{ 'rgba(0, 255, 136, 0.2)' if category == 'success' else 'rgba(255, 99, 99, 0.2)' }}; border: 1px solid {{ 'rgba(0, 255, 136, 0.4)' if category == 'success' else 'rgba(255, 99, 99, 0.4)' }}; color: {{ '#00ff88' if category == 'success' else '#ff6363' }};">
+            <i class="fas {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-circle' }}"></i> {{ message
+            }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+
+    <script>
+        // Theme initialization
+        function initTheme() {
+            let savedTheme = localStorage.getItem('theme');
+            if (!savedTheme) {
+                // Check OS preference, fallback to light mode by default
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    savedTheme = 'dark';
+                } else {
+                    savedTheme = 'light';
+                }
+            }
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <!-- Include Common Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

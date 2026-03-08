@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course_data.title }} - GenXEraAI</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #ffff00;
+            --dark-bg: #0a0e1a;
+            --dark-panel: #0f1420;
+        }
+
+        html[data-theme="light"] {
+            --neon-cyan: #0077be;
+            --neon-magenta: #d81159;
+            --neon-yellow: #ffb703;
+            --dark-bg: #f8f9fa;
+            --dark-panel: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #f8f9fa;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html[data-theme="light"] body {
+            color: #1a1a1a;
+        }
+
+        .cyber-grid {
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: relative;
+        }
+
+        .cyber-grid::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.15), transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .scanline {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.03) 2px, rgba(0, 240, 255, 0.03) 4px);
+            pointer-events: none;
+        }
+
+        #navbar {
+            background: rgba(15, 20, 32, 0.95);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* Enrollment Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: var(--dark-panel);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        html[data-theme="light"] .modal-content {
+            background: #ffffff;
+            border-color: #0077be;
+            box-shadow: 0 0 30px rgba(0, 119, 190, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            padding-bottom: 1rem;
+        }
+
+        html[data-theme="light"] .modal-header {
+            border-bottom-color: rgba(0, 119, 190, 0.2);
+        }
+
+        .modal-header h2 {
+            color: var(--neon-cyan);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--neon-cyan);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .tier-selection {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tier-card {
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 240, 255, 0.05);
+            position: relative;
+        }
+
+        html[data-theme="light"] .tier-card {
+            border-color: rgba(0, 119, 190, 0.3);
+            background: rgba(0, 119, 190, 0.05);
+        }
+
+        .tier-card:hover {
+            border-color: var(--neon-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .tier-card.selected {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+        }
+
+        html[data-theme="light"] .tier-card.selected {
+            background: rgba(0, 119, 190, 0.15);
+            box-shadow: 0 0 30px rgba(0, 119, 190, 0.3);
+        }
+
+        .tier-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+            margin: 0.5rem 0;
+        }
+
+        .tier-duration {
+            color: var(--neon-magenta);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tier-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        html[data-theme="light"] .tier-features {
+            color: #000;
+        }
+
+        .tier-features li {
+            padding: 0.3rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .tier-features i {
+            color: var(--neon-cyan);
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+            color: var(--neon-cyan);
+        }
+
+        html[data-theme="light"] .form-group label {
+            color: #0077be;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 0.5rem;
+            background: rgba(0, 240, 255, 0.05);
+            color: #f8f9fa;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        html[data-theme="light"] .form-group input {
+            border-color: rgba(0, 119, 190, 0.3);
+            background: rgba(0, 119, 190, 0.05);
+            color: #1a1a1a;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        html[data-theme="light"] .form-group input:focus {
+            border-color: #0077be;
+            background: rgba(0, 119, 190, 0.1);
+            box-shadow: 0 0 10px rgba(0, 119, 190, 0.2);
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions button {
+            padding: 0.8rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .cancel-btn {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        html[data-theme="light"] .cancel-btn {
+            background: rgba(0, 119, 190, 0.1);
+            color: #0077be;
+            border: 1px solid rgba(0, 119, 190, 0.3);
+        }
+
+        .cancel-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        html[data-theme="light"] .cancel-btn:hover {
+            background: rgba(0, 119, 190, 0.2);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-magenta) 100%);
+            color: black;
+            font-weight: 700;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .form-hidden {
+            display: none;
+        }
+
+        .form-visible {
+            display: block;
+        }
+
+        .neon-btn {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .neon-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+        }
+
+        .section-intro {
+            color: #aaa;
+        }
+
+        html[data-theme="light"] .section-intro {
+            color: #000;
+        }
+
+        .course-about {
+            color: #ccc;
+        }
+
+        html[data-theme="light"] .course-about {
+            color: #000;
+        }
+
+        .cta-text {
+            color: #aaa;
+        }
+
+        html[data-theme="light"] .cta-text {
+            color: #000;
+        }
+
+        .course-header {
+            background: linear-gradient(135deg, #0f1420 0%, #1a1f35 100%);
+            border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+            padding: 3rem 2rem;
+        }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 1rem;
+        }
+
+        .course-description {
+            font-size: 1.1rem;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .course-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .highlight-box {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .highlight-label {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        html[data-theme="light"] .highlight-label {
+            color: #000;
+        }
+
+        .highlight-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+        }
+
+        .content-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(0, 240, 255, 0.2);
+            padding-bottom: 1rem;
+        }
+
+        .list-item {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            border-left: 2px solid rgba(0, 240, 255, 0.3);
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        .experts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .expert-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .expert-icon {
+            font-size: 3rem;
+            color: var(--neon-cyan);
+            margin-bottom: 1rem;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .expert-icon i {
+            font-size: 2.5rem;
+            color: var(--neon-cyan);
+        }
+
+        .expert-expertise {
+            font-size: 0.9rem;
+            color: var(--neon-magenta);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .expert-description {
+            font-size: 0.85rem;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        html[data-theme="light"] .expert-description {
+            color: #000;
+        }
+
+        .syllabus-item {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .syllabus-header {
+            font-weight: bold;
+            color: var(--neon-cyan);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.05rem;
+        }
+
+        .syllabus-content {
+            margin-top: 0.75rem;
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            display: none;
+        }
+
+        html[data-theme="light"] .syllabus-content {
+            color: #000;
+        }
+
+        .syllabus-content.open {
+            display: block;
+        }
+
+        .icon-rotate {
+            transition: transform 0.3s ease;
+        }
+
+        .icon-rotate.open {
+            transform: rotate(180deg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        html[data-theme="light"] .stat-label {
+            color: #000;
+        }
+
+        .enroll-btn {
+            background: linear-gradient(135deg, var(--neon-cyan), #00a8cc);
+            color: #0a0e1a;
+            border: none;
+            padding: 1.25rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .enroll-btn:hover {
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.7);
+            transform: translateY(-3px);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            gap: 1rem;
+        }
+
+        html[data-theme="light"] .course-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f9fc 100%);
+            border-color: rgba(0, 119, 190, 0.2);
+        }
+
+        html[data-theme="light"] .course-title {
+            color: var(--neon-cyan);
+        }
+
+        html[data-theme="light"] .course-description {
+            color: #000;
+        }
+
+        html[data-theme="light"] .highlight-box {
+            background: rgba(0, 119, 190, 0.1);
+            border-color: rgba(0, 119, 190, 0.2);
+        }
+
+        html[data-theme="light"] .expert-card {
+            background: linear-gradient(135deg, rgba(0, 119, 190, 0.1) 0%, rgba(216, 17, 89, 0.1) 100%);
+            border-color: rgba(0, 119, 190, 0.2);
+        }
+
+        html[data-theme="light"] .list-item {
+            color: #000;
+            border-color: rgba(0, 119, 190, 0.3);
+        }
+
+        html[data-theme="light"] .syllabus-item {
+            background: rgba(0, 119, 190, 0.05);
+        }
+
+        html[data-theme="light"] .stat-box {
+            background: rgba(0, 119, 190, 0.05);
+            border-color: rgba(0, 119, 190, 0.2);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--neon-cyan);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* Navbar light override */
+        html[data-theme="light"] #navbar {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom-color: rgba(0, 119, 190, 0.2);
+        }
+
+        /* Footer styles */
+        .site-footer {
+            background: rgba(15, 20, 32, 0.95);
+            border-top: 1px solid rgba(0, 240, 255, 0.2);
+            margin-top: 4rem;
+            padding: 2rem;
+        }
+
+        html[data-theme="light"] .site-footer {
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 119, 190, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header id="navbar">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="{{ url_for('index') }}" class="back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Back to Internships
+            </a>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars-fill theme-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Course Header -->
+    <section class="course-header cyber-grid relative">
+        <div class="scanline"></div>
+        <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-8">
+            <h1 class="course-title">{{ course_data.title }}</h1>
+            <p class="course-description">{{ course_data.description }}</p>
+
+            <div class="course-highlights">
+                <div class="highlight-box">
+                    <div class="highlight-label">Level</div>
+                    <div class="highlight-value">{{ course_data.level }}</div>
+                </div>
+                <div class="highlight-box">
+                    <div class="highlight-label">Duration</div>
+                    <div class="highlight-value">{{ course_data.duration }}</div>
+                </div>
+                <div class="highlight-box">
+                    <div class="highlight-label">Hours</div>
+                    <div class="highlight-value">{{ course_data.hours }}</div>
+                </div>
+                <div class="highlight-box">
+                    <div class="highlight-label">Format</div>
+                    <div class="highlight-value">{{ course_data.format }}</div>
+                </div>
+            </div>
+
+            <button class="enroll-btn" onclick="openEnrollmentModal()">
+                Enroll Now - Start Learning Today
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 md:px-8 py-12">
+
+        <!-- Course Stats -->
+        <div class="content-section">
+            <h2 class="section-title">Course Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">{{ course_data.stats.enrolled }}</div>
+                    <div class="stat-label">Students Enrolled</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ course_data.stats.completion }}</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">{{ course_data.stats.rating }}</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="content-section">
+            <h2 class="section-title">✓ Prerequisites</h2>
+            <div>
+                {% for prerequisite in course_data.prerequisites %}
+                <div class="list-item">{{ prerequisite }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- What You'll Learn -->
+        <div class="content-section">
+            <h2 class="section-title">★ What You'll Learn</h2>
+            <div>
+                {% for learning in course_data.learnings %}
+                <div class="list-item">{{ learning }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Industrial Experts -->
+        <div class="content-section">
+            <h2 class="section-title">🎯 Industrial Experts</h2>
+            <p class="section-intro" style="margin-bottom: 1.5rem;">Learn from industry leaders and experienced
+                professionals who bring real-world expertise to the classroom.</p>
+            <div class="experts-grid">
+                {% for expert in course_data.experts %}
+                <div class="expert-card">
+                    <div class="expert-icon">
+                        <i class="{{ expert.icon }}"></i>
+                    </div>
+                    <div class="expert-expertise">{{ expert.expertise }}</div>
+                    <div class="expert-description">{{ expert.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- About Course -->
+        <div class="content-section">
+            <h2 class="section-title">🎓 About This Course</h2>
+            <p class="course-about" style="line-height: 1.8;">{{ course_data.about }}</p>
+        </div>
+
+        <!-- Course Syllabus -->
+        <div class="content-section">
+            <h2 class="section-title">Course Syllabus ({{ course_data.total_weeks }})</h2>
+            <div>
+                {% for week in course_data.syllabus %}
+                <div class="syllabus-item">
+                    <div class="syllabus-header" onclick="toggleSyllabus(this)">
+                        <span>{{ week.week }}</span>
+                        <i class="bi bi-chevron-down icon-rotate"></i>
+                    </div>
+                    <div class="syllabus-content">
+
+                        <ul class="syllabus-topics" style="margin-left: 1.5rem;">
+                            {% for topic in week.topics %}
+                            <li style="margin-bottom: 0.4rem;">{{ topic }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Final CTA -->
+        <div class="content-section"
+            style="text-align: center; padding: 2rem; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 0.75rem;">
+            <h2 style="font-size: 1.75rem; color: var(--neon-cyan); margin-bottom: 1rem;">Ready to Start Learning?</h2>
+            <p class="cta-text" style="margin-bottom: 1.5rem;">Join hundreds of students who have transformed their
+                careers with our comprehensive training programs.</p>
+            <button class="enroll-btn" onclick="openEnrollmentModal()">
+                Enroll Now - Secure Your Spot
+            </button>
+        </div>
+
+        <!-- Enrollment Modal -->
+        <div id="enrollmentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Your Learning Path</h2>
+                    <button class="close-btn" onclick="closeEnrollmentModal()">&times;</button>
+                </div>
+
+                <!-- Tier Selection View -->
+                <div id="tierSelectionView" class="form-visible">
+                    <p style="color: #aaa; margin-bottom: 1.5rem; text-align: center;">Choose the plan that fits your
+                        needs</p>
+                    <div class="tier-selection">
+                        <div class="tier-card" onclick="selectTier(this, '{{ course_data.price | default(999) }}', 'Premium Plan')">
+                            <div
+                                style="text-decoration: line-through; color: #999; font-size: 1.2rem; margin-bottom: 0.25rem;">
+                                ₹{{ course_data.original_price | default(1999) }}</div>
+                            <div class="tier-price">₹{{ course_data.price | default(999) }} <span style="font-size: 1.2rem; font-weight: 400;">only</span>
+                            </div>
+                            <div class="tier-duration">{{ course_data.duration }}</div>
+                            <ul class="tier-features">
+                                <li><i class="bi bi-check-circle-fill"></i> Live Classes</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 1 Minor Project</li>
+                                <li><i class="bi bi-check-circle-fill"></i> 1 Certification</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Doubt Clearing Sessions</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Mentor Guidance</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Project Guidance</li>
+                                <li><i class="bi bi-check-circle-fill"></i> Resume Building</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <button class="enroll-btn" onclick="proceedToForm()" id="proceedBtn">
+                            Proceed to Enrollment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form View -->
+                <div id="enrollmentFormView" class="form-hidden">
+                    <p style="color: #aaa; margin-bottom: 1rem; text-align: center;">Complete your enrollment details
+                    </p>
+                    <form id="enrollmentForm">
+                        <div class="form-group">
+                            <label for="fullName">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" required
+                                placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="enrollmentNumber">Enrollment Number *</label>
+                            <input type="text" id="enrollmentNumber" name="enrollmentNumber" required
+                                placeholder="Enter your enrollment/roll number">
+                        </div>
+                        <div class="form-group">
+                            <label for="branch">Branch *</label>
+                            <input type="text" id="branch" name="branch" required placeholder="e.g., CSE, ECE, ME">
+                        </div>
+                        <div class="form-group">
+                            <label for="year">Year *</label>
+                            <input type="text" id="year" name="year" required placeholder="e.g., 1st, 2nd, 3rd, 4th">
+                        </div>
+                        <div class="form-group">
+                            <label for="collegeName">College Name *</label>
+                            <input type="text" id="collegeName" name="collegeName" required
+                                placeholder="Enter your college name">
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" required placeholder="Enter your city">
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp Number *</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" required
+                                placeholder="Enter your WhatsApp number (10 digits)">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn" onclick="backToTierSelection()">Back</button>
+                            <button type="submit" class="submit-btn">Proceed For Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            <p>&copy; <span id="year"></span> GenXEraAI. Built for students who prove, not just watch.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Enrollment Modal Variables
+        let selectedTier = null;
+        let selectedPrice = null;
+        let selectedPlanName = null;
+        const courseName = "{{ course_data.title }}";
+
+        // Modal Management Functions
+        function openEnrollmentModal() {
+            document.getElementById('enrollmentModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEnrollmentModal() {
+            document.getElementById('enrollmentModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            resetModal();
+        }
+
+        function resetModal() {
+            selectedTier = null;
+            selectedPrice = null;
+            selectedPlanName = null;
+            document.querySelectorAll('.tier-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('tierSelectionView').classList.add('form-visible');
+            document.getElementById('tierSelectionView').classList.remove('form-hidden');
+            document.getElementById('enrollmentFormView').classList.add('form-hidden');
+            document.getElementById('enrollmentFormView').classList.remove('form-visible');
+            document.getElementById('proceedBtn').disabled = true;
+            document.getElementById('proceedBtn').style.opacity = '0.5';
+            document.getElementById('proceedBtn').style.cursor = 'not-allowed';
+            document.getElementById('enrollmentForm').reset();
+        }
+
+        function selectTier(element, price, planName) {
+            // Remove selection from all cards
+            document.querySelectorAll('.tier-card').forEach(card => card.classList.remove('selected'));
+
+            // Add selection to clicked card
+            element.classList.add('selected');
+
+            // Store selection
+            selectedTier = element;
+            selectedPrice = price;
+            selectedPlanName = planName;
+
+            // Enable proceed button
+            document.getElementById('proceedBtn').disabled = false;
+            document.getElementById('proceedBtn').style.opacity = '1';
+            document.getElementById('proceedBtn').style.cursor = 'pointer';
+        }
+
+        function proceedToForm() {
+            if (!selectedPrice) {
+                selectedPrice = '999';
+                selectedPlanName = 'Premium Plan';
+            }
+
+            document.getElementById('tierSelectionView').classList.add('form-hidden');
+            document.getElementById('tierSelectionView').classList.remove('form-visible');
+            document.getElementById('enrollmentFormView').classList.remove('form-hidden');
+            document.getElementById('enrollmentFormView').classList.add('form-visible');
+        }
+
+        function backToTierSelection() {
+            document.getElementById('tierSelectionView').classList.remove('form-hidden');
+            document.getElementById('tierSelectionView').classList.add('form-visible');
+            document.getElementById('enrollmentFormView').classList.add('form-hidden');
+            document.getElementById('enrollmentFormView').classList.remove('form-visible');
+        }
+
+        // Form Submission
+        document.getElementById('enrollmentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const enrollmentNumber = document.getElementById('enrollmentNumber').value.trim();
+            const branch = document.getElementById('branch').value.trim();
+            const year = document.getElementById('year').value.trim();
+            const collegeName = document.getElementById('collegeName').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+
+            // Validate inputs
+            if (!fullName || !enrollmentNumber || !branch || !year || !collegeName || !city || !whatsapp) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Validate WhatsApp number
+            if (!/^\d{10}$/.test(whatsapp)) {
+                alert('Please enter a valid 10-digit WhatsApp number');
+                return;
+            }
+
+            // Create WhatsApp message
+            const message = `🎓 GenXEraAI Enrollment Request
+
+📌 Internship: ${courseName}
+
+💰 Plan Selected: ${selectedPlanName}
+💵 Price: ₹${selectedPrice}
+
+👤 Full Name: ${fullName}
+🆔 Enrollment Number: ${enrollmentNumber}
+🏫 Branch: ${branch}
+📅 Year: ${year}
+🏢 College: ${collegeName}
+📍 City: ${city}
+📱 WhatsApp: ${whatsapp}
+
+Ready to start this amazing journey! 🚀`;
+
+            // Encode message for WhatsApp URL
+            const encodedMessage = encodeURIComponent(message);
+
+            // For demo, we'll use a generic support number. In production, use actual support number
+            let whatsappNumber = '919392352608';
+            if (courseName.includes('Embedded Systems')) {
+                whatsappNumber = '919392643272';
+            }
+            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+            // Close modal before redirecting
+            closeEnrollmentModal();
+
+            // Redirect to WhatsApp after a short delay
+            setTimeout(() => {
+                window.open(whatsappLink, '_blank');
+            }, 300);
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('enrollmentModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeEnrollmentModal();
+            }
+        });
+
+        // Initialize Theme
+        function initTheme() {
+            let savedTheme = localStorage.getItem('theme');
+            if (!savedTheme) {
+                // Check OS preference, fallback to light mode by default
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    savedTheme = 'dark';
+                } else {
+                    savedTheme = 'light';
+                }
+            }
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.querySelector('.theme-icon');
+            if (icon) {
+                if (theme === 'light') {
+                    icon.classList.remove('bi-moon-stars-fill');
+                    icon.classList.add('bi-sun-fill');
+                } else {
+                    icon.classList.remove('bi-sun-fill');
+                    icon.classList.add('bi-moon-stars-fill');
+                }
+            }
+        }
+
+        function toggleSyllabus(element) {
+            const content = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            content.classList.toggle('open');
+            icon.classList.toggle('open');
+        }
+
+        document.addEventListener('DOMContentLoaded', initTheme);
+        AOS.init({ once: true, offset: 100 });
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+
+</body>
+
+</html>
